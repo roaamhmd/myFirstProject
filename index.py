@@ -1,52 +1,26 @@
-import os
-import sys
-from datetime import datetime
+import random
 
-
-class SystemTester:
-
-    def __init__(self, project_name="githubProject"):
-        self.project_name = project_name
-        self.timestamp = datetime.now()
-
-    def get_system_info(self):
-        return {
-            "Python Version": sys.version.split()[0],
-            "Execution Path": sys.executable,
-            "Working Directory": os.getcwd(),
-            "Script File": os.path.basename(__file__),
-        }
-
-    def run_diagnostics(self):
-        print("=" * 55)
-        print(f"🚀 FULL ENVIRONMENT DIAGNOSTIC: {self.project_name}")
-        print("=" * 55)
-
-        # 1. System & Path Checks
-        print("\n📌 SYSTEM DETAILS:")
-        for key, val in self.get_system_info().items():
-            print(f"  • {key:<18}: {val}")
-
-        # 2. Logic & Data Processing Test
-        print("\n⚡ DATA PROCESSING TEST:")
-        dataset = [12, 45, 67, 23, 89, 34]
-        transformed = [x * 2 for x in dataset if x > 30]
-
-        print(f"  • Original Data     : {dataset}")
-        print(f"  • Filtered (>30) *2 : {transformed}")
-        print(
-            f"  • Stats             : Max = {max(dataset)} | Min = {min(dataset)} | Total = {sum(dataset)}"
-        )
-
-        # 3. Execution Confirmation
-        print("\n" + "-" * 55)
-        formatted_time = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        print(
-            f"✅ STATUS: Python is fully functional on VS Code! ({formatted_time})"
-        )
-        print("=" * 55 + "\n")
-
+def number_guessing_game():
+    print("🎯 Welcome to the Number Guessing Game!")
+    print("I'm thinking of a number between 1 and 50.")
+    
+    secret_number = random.randint(1, 50)
+    attempts = 0
+    
+    while True:
+        try:
+            guess = int(input("\nEnter your guess: "))
+            attempts += 1
+            
+            if guess < secret_number:
+                print("Too low! 📈 Try guessing higher.")
+            elif guess > secret_number:
+                print("Too high! 📉 Try guessing lower.")
+            else:
+                print(f"🎉 Spot on! You guessed it in {attempts} attempt(s)!")
+                break
+        except ValueError:
+            print("❌ Invalid input! Please enter a whole number.")
 
 if __name__ == "__main__":
-    tester = SystemTester()
-    tester.run_diagnostics()
+    number_guessing_game()
