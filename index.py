@@ -1,3 +1,4 @@
+import pandas as pd
 from playwright.sync_api import sync_playwright
 
 def main():
@@ -12,7 +13,20 @@ def main():
         if target_element.count() == 0:
             print("لم يتم العثور على البيانات المطلوبة")
         else:
-            print(target_element.inner_text().strip())
+            rows = target_element.locator("tr").all()
+            table_data = []
+
+            for row in rows:
+                cells = [col.inner_text().strip() for col in row.locator("th, td").all()]
+                if cells:
+                    table_data.append(cells)
+
+            if len(table_data) > 1:
+                df = pd.DataFrame(table_data[1:], columns=table_data[0])
+                df.to_excel("top_5_nationalities.xlsx", index=False)
+                print("✅ تم استخراج البيانات وحفظها بنجاح في ملف top_5_nationalities.xlsx")
+            else:
+                print("⚠️ الجدول فارغ أو لا يحتوي على عناصر كافية")
 
         browser.close()
 
