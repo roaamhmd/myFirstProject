@@ -17,14 +17,11 @@ def main():
             table_data = []
 
             for row in rows:
-
                 cells = [col.inner_text().strip() for col in row.locator("th, td").all()]
-    
                 filtered_cells = [c for c in cells if c != ""]
-    
+                
                 if filtered_cells:
                     table_data.append(filtered_cells)
-                
 
             if len(table_data) > 1:
                 df = pd.DataFrame(table_data[1:], columns=table_data[0])
