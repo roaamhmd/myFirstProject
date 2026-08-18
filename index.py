@@ -1,46 +1,39 @@
-import requests
-from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
-# 1. رابط الصفحة الرئيسية للموقع
-url = "https://www.sdc.com.jo/ar"
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-
-# 2. جلب محتوى الصفحة
-response = requests.get(url, headers=headers)
-response.encoding = 'utf-8'
-
-if response.status_code == 200:
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # 3. البحث عن جميع الجداول في الصفحة
-    tables = soup.find_all('table')
-    target_table = None
-    
-    # البحث عن الجدول الذي يحتوي على البيانات المطلوبة
-    for table in tables:
-        if "تداول أعلى خمس جنسيات" in table.text or "القيمة السوقية" in table.text:
-            target_table = table
-            break
-
-    # 4. استخراج البيانات وطباعتها
-    if target_table:
+def main():
+    with sync_playwright() as p:
+        print("جاري فتح الموقع وانتظار تحميل بيانات الجافاسكريبت...")
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        
+        # فتح الصفحة والانتظار حتى انتهاء جميع طلبات الشبكة
+        page.goto("https://www.sdc.com.jo/ar", wait_until="networkidle")
+        
+        # استخراج كافة النصوص الظاهرة في الصفحة
+        page_text = page.inner_text("body")
+        lines = [line.strip() for line in page_text.split("\n") if line.strip()]
+        
         print("\n" + "=" * 45)
-        print("📊 تداول أعلى خمس جنسيات - القيمة السوقية")
+        print("📊 نتائج البحث داخل الصفحة:")
         print("=" * 45)
         
-        rows = target_table.find_all('tr')
-        for row in rows:
-            # جلب محتوى الخلايا (العناوين والبيانات)
-            cols = [cell.text.strip() for cell in row.find_all(['th', 'td']) if cell.text.strip()]
-            if cols:
-                # تنسيق العرض على الشاشة
-                print(f"{cols[0]:<20} | {cols[1]:<15} | {cols[2] if len(cols) > 2 else '':<8}")
-        
+        found = False
+        for i, line in enumerate(lines):
+            if "تداول أعلى خمس جنسيات" in line or "القيمة السوقية" in line:
+                found = True
+                # طباعة السطر المحدد والأقسام المجاورة له (الجنسيات والأرقام)
+                start_index = max(0, i - 1)
+                end_index = min(len(lines), i + 20)
+                
+                for item in lines[start_index:end_index]:
+                    print(item)
+                break
+                
+        if not found:
+            print("لم يتم العثور على المقطع المطلوبة.")
+            
         print("=" * 45 + "\n")
-    else:
-        print("لم يتم العثور على الجدول داخل الصفحة.")
-else:
-    print(f"تعذر الاتصال بالموقع، كود الحالة: {response.status_code}")
+        browser.close()
+
+if __name__ == "__main__":
+    main()
